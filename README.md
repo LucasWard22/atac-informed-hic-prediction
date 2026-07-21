@@ -20,23 +20,12 @@ The improvement was strongest at longer separations within the modelled 100 kb�
 
 ## Approach
 
-- **Cell line:** GM12878
-- **Inputs:** ENCODE ATAC-seq signal and Hi-C contacts
-- **Resolution:** 100 kb
-- **Modelled pairs:** 100 kb to 1.5 Mb apart
-- **Features:** genomic distance, accessibility at both loci, mean accessibility, absolute difference, and product
-- **Model:** `HistGradientBoostingRegressor`
-- **Primary split:** chromosomes 16–19 for training, chromosome 20 for model selection, and the chromosome 21 long arm for the final test
-- **Baseline:** mean contact intensity at each genomic distance, learned from training chromosomes only
+Comparison of observed Hi-C contacts (left) and ATAC-informed predictions (right) across a 1.6 Mb region of GM12878 chromosome 21. The model used chromatin accessibility at both interacting regions together with genomic distance to predict Hi-C contact strength at 100 kb resolution.
+
+The model was trained on chromosomes 16–19, selected using chromosome 20, and tested on the chromosome 21 long arm. Brighter colours represent stronger contacts, while grey diagonal cells show self-interactions that were excluded from modelling. Overall, the prediction captures the broad distance-dependent pattern of the observed contact map, although some local differences remain.
 
 ![Observed and predicted chromosome 21 contact window](figures/chr21_observed_vs_predicted_1p6Mb.png)
 
-## Repository contents
-
-- `notebooks/ATAC_to_HiC_GM12878.ipynb` — cleaned Colab workflow
-- `figures/` — summary and observed-versus-predicted figures
-- `results/` — evaluation tables, permutation values, predictions, and JSON summary
-- `models/` — fitted pairwise gradient-boosting model
 
 The saved model was created with scikit-learn 1.6.1; that version is pinned in `requirements.txt` for compatible loading.
 
