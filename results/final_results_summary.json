@@ -1,0 +1,21 @@
+{
+  "project": "ATAC-informed prediction of Hi-C contacts",
+  "cell_line": "GM12878",
+  "resolution_bp": 100000,
+  "maximum_separation_bp": 1500000,
+  "training_chromosomes": [
+    "chr16",
+    "chr17",
+    "chr18",
+    "chr19"
+  ],
+  "validation_chromosome": "chr20",
+  "independent_test_chromosome": "chr21",
+  "chromosome21_mse_improvement_percent": 23.59013202414513,
+  "chromosome21_mae_improvement_percent": 27.920241864120648,
+  "chromosome21_pearson": 0.7390719545231539,
+  "chromosome21_spearman": 0.81610447653158,
+  "permutation_p_value": 0.009900990099009901,
+  "mean_leave_one_chromosome_out_mse_improvement": 46.06347904957506,
+  "conclusion": "ATAC-derived features improved short-range Hi-C contact prediction beyond genomic distance."
+}
