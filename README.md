@@ -133,28 +133,6 @@ This study has several important limitations:
 
 Useful next steps would include testing additional cell lines and replicates, analysing all autosomes, comparing multiple Hi-C normalisation methods, adding CTCF and histone-mark features, evaluating compartment- or TAD-aware baselines, and validating on a completely external dataset.
 
-## Repository structure
-
-```text
-.
-├── figures/
-│   ├── ATAC_HiC_final_summary_figure.png
-│   └── chr21_observed_vs_predicted_1p6Mb.png
-├── models/
-│   └── pairwise_ATAC_HiC_model.joblib
-├── notebooks/
-│   └── ATAC_to_HiC_GM12878.ipynb
-├── results/
-│   ├── ATAC_permutation_MSE_values.npy
-│   ├── chromosome21_pairwise_predictions.npz
-│   ├── chromosome_holdout_results.csv
-│   ├── distance_stratified_results.csv
-│   └── final_results_summary.json
-├── LICENSE
-├── README.md
-└── requirements.txt
-```
-
 ## Reproducing the analysis
 
 The notebook is designed to run in Google Colab.
