@@ -1,0 +1,26 @@
+{
+  "gm12878": {
+    "cell_line": "GM12878",
+    "genome_build": "GRCh38",
+    "hic_accession": "ENCFF916GWS",
+    "hic_md5": "49db6d4b5b6a85bad3f42e935406b3b6",
+    "hic_output_type": "mapping quality thresholded contact matrix",
+    "atac_accession": "ENCFF667MDI",
+    "atac_md5": "94e11903753580c8e39d77b331f90caf",
+    "atac_output_type": "signal p-value",
+    "hic_normalisation": "VC_SQRT",
+    "resolution_bp": 100000
+  },
+  "k562": {
+    "cell_line": "K562",
+    "genome_build": "GRCh38",
+    "hic_accession": "ENCFF080DPJ",
+    "hic_md5": "17a4977bb78e267f77199e915ec9243b",
+    "hic_output_type": "mapping quality thresholded contact matrix",
+    "atac_accession": "ENCFF600FDO",
+    "atac_md5": "044f8568fb4c7735cf01e4f8d0d3e5b9",
+    "atac_output_type": "signal p-value",
+    "hic_normalisation": "VC_SQRT",
+    "resolution_bp": 100000
+  }
+}

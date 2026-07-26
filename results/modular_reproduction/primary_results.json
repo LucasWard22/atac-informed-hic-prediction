@@ -1,0 +1,21 @@
+{
+  "model_MSE": 0.5354537584211401,
+  "model_MAE": 0.4463199897999969,
+  "model_R2": 0.6721986229455137,
+  "model_Pearson": 0.8207268710510285,
+  "model_Spearman": 0.8583626211122286,
+  "baseline_MSE": 0.760244085766586,
+  "baseline_MAE": 0.6351331571677535,
+  "baseline_R2": 0.5345834177228608,
+  "baseline_Pearson": 0.7662512410739123,
+  "baseline_Spearman": 0.7877733026711007,
+  "MSE_improvement_percent": 29.568178372447367,
+  "MAE_improvement_percent": 29.728123187542337,
+  "calibration_slope": 0.9635708977284513,
+  "calibration_intercept": 0.17713053562595424,
+  "mean_residual": -0.026539461001106726,
+  "residual_sd": 0.7313397267595088,
+  "selected_max_leaf_nodes": 7,
+  "selected_l2_regularisation": 0.1,
+  "test_pairs": 4935
+}

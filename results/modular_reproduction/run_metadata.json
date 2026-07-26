@@ -1,0 +1,37 @@
+{
+  "analysis": "validated GM12878 chr16-chr21 reproduction",
+  "created_utc": "2026-07-26T13:35:42.102489+00:00",
+  "inputs": {
+    "processed_dataset": {
+      "path": "/workspace/scratch/c48aa57ced8f/research_grade/data/processed/GM12878_VC_SQRT_chr16_21.npz",
+      "md5": "6a1507b409b4f6c825f3ba1f52b12033"
+    }
+  },
+  "parameters": {
+    "training_chromosomes": [
+      "chr16",
+      "chr17",
+      "chr18",
+      "chr19"
+    ],
+    "validation_chromosome": "chr20",
+    "test_chromosome": "chr21",
+    "test_minimum_bin": 130,
+    "resolution_bp": 100000,
+    "maximum_distance_bins": 15,
+    "hic_normalisation": "VC_SQRT",
+    "random_state": 42
+  },
+  "runtime": {
+    "python": "3.12.13",
+    "platform": "Linux-6.12.13-x86_64-with-glibc2.39",
+    "hic-straw": "not installed",
+    "joblib": "1.5.3",
+    "matplotlib": "3.10.8",
+    "numpy": "2.3.5",
+    "pandas": "2.2.3",
+    "pyBigWig": "not installed",
+    "scikit-learn": "1.8.0",
+    "scipy": "1.17.0"
+  }
+}

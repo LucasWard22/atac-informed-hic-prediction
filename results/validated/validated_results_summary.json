@@ -1,0 +1,32 @@
+{
+  "project": "ATAC-informed prediction of short-range cis chromatin contacts",
+  "cell_line": "GM12878",
+  "hic_accession": "ENCFF916GWS",
+  "atac_accession": "ENCFF667MDI",
+  "genome_build": "hg38",
+  "hic_normalisation": "VC_SQRT",
+  "resolution_bp": 100000,
+  "maximum_separation_bp": 1500000,
+  "training_chromosomes": [
+    "chr16",
+    "chr17",
+    "chr18",
+    "chr19"
+  ],
+  "validation_chromosome": "chr20",
+  "independent_test_region": "chr21 long arm",
+  "selected_max_leaf_nodes": 7,
+  "selected_l2_regularisation": 0.1,
+  "distance_baseline_MSE": 0.760244085766586,
+  "distance_ATAC_MSE": 0.5354537584211401,
+  "distance_baseline_MAE": 0.6351331571677535,
+  "distance_ATAC_MAE": 0.4463199897999969,
+  "Pearson": 0.8207268710510285,
+  "Spearman": 0.8583626211122286,
+  "R2": 0.6721986229455137,
+  "MSE_improvement_percent": 29.568178372447367,
+  "MAE_improvement_percent": 29.728123187542337,
+  "nested_chromosomes_improved": 6,
+  "nested_median_MSE_improvement_percent": 45.80476653389692,
+  "nested_median_MAE_improvement_percent": 29.978593115655876
+}

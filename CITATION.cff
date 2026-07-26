@@ -1,0 +1,16 @@
+cff-version: 1.2.0
+message: "If you use this project, please cite it using this metadata."
+title: "ATAC-informed prediction of short-range cis chromatin contacts"
+type: software
+authors:
+  - family-names: Ward
+    given-names: Lucas
+version: 1.0.0
+date-released: 2026-07-26
+license: MIT
+keywords:
+  - ATAC-seq
+  - Hi-C
+  - chromatin accessibility
+  - machine learning
+  - genomics
