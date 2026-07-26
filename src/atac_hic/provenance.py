@@ -1,13 +1,12 @@
 from __future__ import annotations
 
+import json
+import platform
 from datetime import datetime, timezone
 from importlib.metadata import PackageNotFoundError, version
-import json
 from pathlib import Path
-import platform
 
 from .data import file_md5
-
 
 TRACKED_PACKAGES = (
     "hic-straw",

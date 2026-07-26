@@ -1,5 +1,6 @@
-import numpy as np
 import unittest
+
+import numpy as np
 
 from atac_hic.data import validate_processed_dataset
 

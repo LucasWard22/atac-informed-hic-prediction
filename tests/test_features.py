@@ -1,5 +1,6 @@
-import numpy as np
 import unittest
+
+import numpy as np
 
 from atac_hic.features import FEATURE_NAMES, build_pairwise_dataset
 

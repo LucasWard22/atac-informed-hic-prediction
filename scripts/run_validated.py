@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-from argparse import ArgumentParser
 import json
+from argparse import ArgumentParser
 from pathlib import Path
 
 import joblib

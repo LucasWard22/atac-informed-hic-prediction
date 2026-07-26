@@ -1,6 +1,6 @@
 """ATAC-informed prediction of short-range cis Hi-C contacts."""
 
-from .config import DatasetConfig, DATASETS
+from .config import DATASETS, DatasetConfig
 from .features import FEATURE_NAMES, PairwiseDataset, build_pairwise_dataset
 from .models import DistanceBaseline, ModelSettings, make_model
 

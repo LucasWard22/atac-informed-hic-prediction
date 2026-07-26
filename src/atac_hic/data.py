@@ -2,9 +2,9 @@ from __future__ import annotations
 
 import hashlib
 import json
+import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
-import urllib.request
 
 import numpy as np
 

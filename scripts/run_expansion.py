@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-from argparse import ArgumentParser
 import json
+from argparse import ArgumentParser
 from pathlib import Path
 
 import joblib
@@ -26,7 +26,6 @@ from atac_hic.models import (
 )
 from atac_hic.plotting import plot_chromosome_improvements
 from atac_hic.provenance import write_run_metadata
-
 
 PILOT_TRAIN = ["chr16", "chr17", "chr18", "chr19"]
 PILOT_VALIDATION = ["chr20"]

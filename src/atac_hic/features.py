@@ -5,7 +5,6 @@ from dataclasses import dataclass
 import numpy as np
 import pandas as pd
 
-
 FEATURE_NAMES = (
     "distance_bins",
     "lower_ATAC",
