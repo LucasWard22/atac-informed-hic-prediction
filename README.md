@@ -1,81 +1,303 @@
-# ATAC-Informed Prediction of Short-Range Hi-C Contacts in GM12878 Cells
+# ATAC-informed prediction of short-range Hi-C contacts
+
+[![Tests](https://github.com/LucasWard22/atac-informed-hic-prediction/actions/workflows/tests.yml/badge.svg)](https://github.com/LucasWard22/atac-informed-hic-prediction/actions/workflows/tests.yml)
 
 ## Abstract
 
-Chromatin accessibility and three-dimensional genome organisation are known to be related, yet genomic distance remains by far the strongest predictor of contact frequency in Hi-C data. This study asks a narrower and more tractable question: does local ATAC-seq signal improve prediction of short-range cis Hi-C contact strength beyond what genomic distance alone can explain? Matched GM12878 ATAC-seq and Hi-C datasets were obtained from ENCODE and summarised into 100 kb genomic bins. Hi-C contacts were balanced using VC_SQRT normalisation, and analysis was restricted to intrachromosomal pairs separated by 100 kb to 1.5 Mb. A simple distance-dependent baseline was compared against a gradient-boosted model that combined genomic distance with several ATAC-derived features. Chromosomes were kept strictly separate across training, model selection and testing throughout, to guard against genomic data leakage. On an independent chromosome 21 test region, the inclusion of ATAC features reduced mean squared error by 29.6% and mean absolute error by 29.7% relative to the distance-only baseline. The combined model also outperformed the baseline on every chromosome examined in a subsequent nested validation spanning chromosomes 16 through 21. These results support a modest but well-supported conclusion: local chromatin accessibility carries predictive information about short-range GM12878 contact strength that is not captured by genomic distance alone.
+Chromatin accessibility and three-dimensional genome organisation are closely
+related, but genomic distance remains the strongest predictor of contact
+frequency in Hi-C data. This project therefore asks a focused question:
 
-## 1. Introduction
+> Does local ATAC-seq signal improve prediction of short-range cis Hi-C contact
+> strength beyond genomic distance alone?
 
-The folding of chromatin into loops, domains and compartments is thought to be linked to where the genome is accessible to regulatory machinery, but the strength of this relationship at short genomic ranges is not settled. Genomic distance dominates contact frequency in Hi-C experiments almost by definition, since two loci close together on the linear genome are simply more likely to collide in three-dimensional space than two loci far apart. Any claim that a secondary signal, such as chromatin accessibility measured by ATAC-seq, adds meaningful predictive power has to be evaluated against this strong and well-understood baseline.
+Matched GM12878 ATAC-seq and Hi-C data were obtained from ENCODE and summarised
+in 100 kb genomic bins. Hi-C contacts were balanced using `VC_SQRT`
+normalisation, and only intrachromosomal pairs separated by 100 kb–1.5 Mb were
+included. A distance-dependent baseline was compared with a gradient-boosted
+model containing genomic distance and ATAC-derived features. Chromosomes were
+kept separate during training, model selection and testing to reduce genomic
+data leakage.
 
-This project takes a deliberately narrow approach. Rather than attempting to build a comprehensive model of genome folding, it asks whether a small set of features derived from local ATAC-seq signal can improve on a distance-only baseline for short-range contacts in a single, well-characterised cell line. The scope is intentionally limited: one cell line (GM12878), one resolution (100 kb), one range of genomic separations (100 kb to 1.5 Mb), so that the resulting claims stay tightly supported by the data.
+On the independent chromosome 21 test region, adding ATAC features reduced mean
+squared error by **29.57%** and mean absolute error by **29.73%** relative to
+the distance-only baseline. The combined model also improved on every
+chromosome in a nested chromosome-level validation across chromosomes 16–21.
+These results support a limited conclusion: local chromatin accessibility
+contains useful predictive information about short-range GM12878 contact
+strength beyond genomic distance alone.
 
-## 2. Data
+## Study design
 
-Matched GRCh38 GM12878 ATAC-seq and Hi-C datasets were obtained from ENCODE. The Hi-C matrix was extracted at 100 kb resolution and balanced using VC_SQRT normalisation, and the ATAC-seq signal p-value track was averaged into the same genomic bins. A K562 ATAC-seq and Hi-C dataset was also retained in the project's data manifest for a planned cross-cell-line comparison, but it was not used in producing any of the validated results reported here.
+The main analysis used a strict chromosome-level split:
 
-Chromosomes containing missing or non-finite values were excluded during data validation, and every processed Hi-C matrix was checked for consistent dimensions, non-negative entries and symmetry before use. Both ATAC and Hi-C values were transformed with a log1p transformation prior to modelling, a standard way of stabilising variance in signal that spans several orders of magnitude.
+| Dataset partition | Chromosomes | Purpose |
+|---|---|---|
+| Training | chr16–chr19 | Fit candidate models |
+| Validation | chr20 | Select model complexity and regularisation |
+| Independent test | chr21 long arm | Final performance assessment |
 
-## 3. Study Design
+The held-out chromosome 21 region was not used during training or model
+selection. The primary test contained **4,935 genomic pairs**.
 
-The central analysis used a strict chromosome-level split, chosen specifically to avoid the kind of leakage that can arise when nearby genomic bins end up in both the training and test sets. Chromosomes 16 through 19 were used to fit candidate models. Chromosome 20 was reserved for choosing model complexity and regularisation. Chromosome 21's long arm was held out entirely and used only once, as a final and fully independent test of the selected model. This region contained 4,935 genomic pairs.
+For each pair, the model used:
 
-For every pair of loci, five features were constructed: the genomic separation between the two bins, the lower and higher of the two ATAC signal values at the pair, the mean of the two ATAC values, the absolute difference between them, and their product. Features were built so that swapping the order of the two loci in a pair would not change its representation, which matters because contact strength between two bins has no natural directionality.
+- genomic separation in 100 kb bins;
+- the lower and higher ATAC signal at the two loci;
+- mean ATAC signal;
+- absolute difference in ATAC signal; and
+- the product of the two ATAC signals.
 
-The modelling approach itself was a gradient-boosted regression tree, specifically a histogram-based gradient boosting regressor, tuned with seven maximum leaf nodes, an L2 regularisation strength of 0.1, a learning rate of 0.05, and 250 boosting iterations. These settings were chosen using chromosome 20 alone, before the model was ever exposed to chromosome 21.
+ATAC values and Hi-C contact strengths were transformed using `log1p`. The
+final model was a `HistGradientBoostingRegressor` with 7 maximum leaf nodes,
+L2 regularisation of 0.1, a learning rate of 0.05 and 250 boosting iterations.
+These settings were selected on chromosome 20 before testing on chromosome 21.
 
-## 4. Results
+## Results
 
-### 4.1 ATAC features improve prediction on the independent chromosome 21 test
+### ATAC improves prediction on the independent chromosome 21 test
 
-The distance-only baseline captured a large part of the expected distance-decay relationship, which was expected given how strongly contact frequency depends on genomic separation. Adding the ATAC-derived features nonetheless improved every metric that was assessed. Mean squared error fell from 0.7602 to 0.5355, and mean absolute error fell from 0.6351 to 0.4463, reductions of 29.6% and 29.7% respectively. R-squared rose from 0.535 to 0.672, Pearson correlation rose from 0.766 to 0.821, and Spearman correlation rose from 0.788 to 0.858.
+The distance-only baseline captured much of the expected distance-decay
+relationship. However, adding ATAC-derived features improved every reported
+test metric.
 
-The combined model was also well calibrated on this held-out region. The calibration slope was 0.964 and the mean residual was -0.027 in log1p contact units, indicating little systematic bias across the test set. A residual-by-distance analysis showed that the mean residual stayed close to zero across most genomic separations, with a modest tendency toward over-prediction at the very shortest distances examined.
+| Held-out chr21 metric | Distance only | Distance + ATAC |
+|---|---:|---:|
+| MSE | 0.7602 | **0.5355** |
+| MAE | 0.6351 | **0.4463** |
+| R² | 0.5346 | **0.6722** |
+| Pearson correlation | 0.7663 | **0.8207** |
+| Spearman correlation | 0.7878 | **0.8584** |
+
+This corresponds to a **29.57% reduction in MSE** and a **29.73% reduction in
+MAE**. The calibration slope was 0.964 and the mean residual was −0.027
+`log1p` contact units, indicating little overall bias on the held-out region.
 
 ![GM12878 held-out chromosome 21 validation](results/modular_reproduction/chr21_validation_diagnostics.png)
 
-**Figure 1. Validation of ATAC-informed contact prediction on held-out chromosome 21.** The top left panel shows observed against predicted log1p contact strengths for the distance-plus-ATAC model, with colour intensity representing the density of genomic pairs and a dashed line marking perfect agreement. The top right panel shows the mean residual and interquartile range at each genomic separation, which stayed close to zero across most of the range examined. The bottom left panel shows the model ablation, comparing mean squared error across the naive mean, distance-only, ATAC-only and combined models. Distance was clearly the stronger individual predictor, but the lowest error was obtained only when distance and ATAC were combined. The bottom right panel shows decile calibration for the distance-only and combined models, with the distance-plus-ATAC predictions tracking the ideal calibration line more closely across most of the observed contact range.
+**Figure 1 | Validation of ATAC-informed contact prediction on held-out
+chromosome 21.** Top left, observed and predicted `log1p` contact strengths for
+the distance-plus-ATAC model; colour intensity represents the density of
+genomic pairs and the dashed line shows perfect agreement. Top right, mean
+residual and interquartile range at each genomic separation. The mean residual
+remained close to zero across most distances, although prediction was slightly
+high at the shortest separations. Bottom left, model ablation showing mean
+squared error for the naive mean, distance-only, ATAC-only and combined models.
+Distance was the dominant individual predictor, but the lowest error was
+obtained when distance and ATAC were combined. Bottom right, decile calibration
+for the distance-only and combined models. The distance-plus-ATAC predictions
+followed the ideal calibration line more closely across most of the observed
+contact range.
 
-### 4.2 The model recovers broad contact structure, though not fine-scale detail
+### The model recovers broad contact structure within the held-out region
 
-Comparing observed and predicted contact maps across a 1.6 Mb window of the held-out chromosome 21 region (chr21:34.5-36.1 Mb) showed that the predicted map reproduced the main distance-dependent pattern: contacts were strongest near the diagonal and weakened with increasing genomic separation, and broad differences in contact strength across the window were preserved. The predicted map was visibly smoother than the observed Hi-C data in places, most noticeably toward the edges of the window where predicted contact strength drops off more steeply than in the observed matrix, and it did not reproduce every local fluctuation present in the real measurements. This is an expected consequence of using a model built from only two loci's ATAC signal and their genomic separation. The contact map comparison should be read as a qualitative illustration of model behaviour rather than as evidence that fine-scale chromatin structure has been fully recovered. The quantitative metrics reported above, which cover the entire held-out test region, remain the primary basis for assessing performance.
+To examine the predictions in their genomic context, observed and predicted
+contact maps were compared across a 1.6 Mb window of the held-out chromosome 21
+region. The predicted map reproduced the main distance-dependent pattern:
+contacts were strongest close to the diagonal and generally weakened as
+genomic separation increased. It also retained broad differences in predicted
+contact strength across the window.
+
+The prediction was smoother than the observed Hi-C map and did not reproduce
+every local fluctuation. This is expected from a model based only on genomic
+distance and two-locus ATAC signal. The contact map therefore provides a
+qualitative view of model behaviour rather than evidence of exact recovery of
+fine-scale chromatin structure. Quantitative performance was assessed across
+the complete held-out test region using the metrics reported above.
 
 ![Observed and predicted Hi-C contacts across the held-out chromosome 21 region](results/modular_reproduction/chr21_observed_vs_predicted_VC_SQRT.png)
 
-**Figure 2. Observed and predicted contact structure within a held-out chromosome 21 window.** The left panel shows observed VC_SQRT-balanced Hi-C contact strengths across chr21:34.5-36.1 Mb. The right panel shows contact strengths predicted by the fixed distance-plus-ATAC model for the same genomic pairs, expressed as log1p contact strength in 100 kb bins on the same 0-8 colour scale as the observed map, allowing direct visual comparison between the two. Grey diagonal cells represent self-interactions, which were excluded from both model fitting and evaluation. The predicted map recovers the broad distance-dependent contact pattern seen in the observed data, including the general decay in strength away from the diagonal, but is noticeably smoother and loses some of the patchier, higher-contrast structure visible in the observed matrix, particularly further from the diagonal. This is consistent with the model's reliance on only genomic distance and two-locus ATAC signal rather than any finer-scale structural information.
+**Figure 2 | Observed and predicted contact structure within a held-out
+chromosome 21 window.** Left, observed `VC_SQRT`-balanced Hi-C contact
+strengths across chr21:34.5–36.1 Mb. Right, contact strengths predicted by the
+fixed distance-plus-ATAC model for the same genomic pairs. Values are shown as
+`log1p` contact strength in 100 kb bins using a shared colour scale, allowing
+direct visual comparison between panels. Grey diagonal cells represent
+self-interactions, which were excluded from model fitting and evaluation. The
+model recovered the broad distance-dependent contact pattern but produced a
+smoother map than the observed data.
 
-### 4.3 Distance and accessibility provide complementary rather than redundant information
+### Distance and ATAC provide complementary information
 
-An ablation analysis compared four models: a naive baseline that always predicted the training-set mean contact strength, a distance-only model, an ATAC-only model, and the combined distance-plus-ATAC model. ATAC signal on its own performed considerably worse than genomic distance (MSE of 1.383 versus 0.760, Pearson correlation of 0.393 versus 0.766), confirming that distance remains the dominant single predictor of short-range contact strength. Nevertheless, the combined model outperformed both individual-feature models by a substantial margin, reaching an MSE of 0.536 and a Pearson correlation of 0.821. A weak individual predictor still adding real value once combined with a strong one fits the biological interpretation that genomic distance describes the broad decay in contact frequency with separation, while local chromatin accessibility contributes finer-grained information distinguishing pairs at similar separations from one another.
+The ablation analysis showed that ATAC signal alone did not explain contact
+strength as effectively as genomic distance. The combined model nevertheless
+performed substantially better than either information source alone.
 
-### 4.4 The improvement generalises beyond chromosome 21
+| Model | MSE | MAE | R² | Pearson |
+|---|---:|---:|---:|---:|
+| Naive training mean | 1.7145 | 1.0082 | −0.0496 | — |
+| Distance only | 0.7602 | 0.6351 | 0.5346 | 0.7663 |
+| ATAC only | 1.3828 | 0.8893 | 0.1535 | 0.3933 |
+| Distance + ATAC | **0.5355** | **0.4463** | **0.6722** | **0.8207** |
 
-Because a single held-out chromosome could in principle be an unrepresentative or favourable test case, a nested chromosome-level validation was carried out across chromosomes 16 through 21, holding out each chromosome in turn while selecting model settings on a separate validation chromosome each time. The combined model improved on the distance-only baseline for all six chromosomes tested. The median reduction in MSE across chromosomes was 45.8%, and the median reduction in MAE was 30.0%. The smallest improvement was observed on chromosome 19, where MSE fell by 9.0%. The size of the improvement varied noticeably from chromosome to chromosome, so the median values should not be read as a genome-wide estimate of expected benefit. The consistent direction of the effect across six independently held-out chromosomes is still good evidence that the chromosome 21 result was not a fluke of that particular test split.
+This is biologically plausible: genomic distance describes the strong average
+decay in contact frequency, whereas local accessibility adds information about
+differences between pairs at similar separations.
 
-## 5. Interpretation
+### The result is consistent across chromosomes 16–21
 
-These results indicate that chromatin accessibility contributes information about short-range Hi-C contact strength that genomic distance alone does not capture. Distance remains the dominant single predictor, and ATAC signal by itself is a comparatively weak one, but the two combine in a way that meaningfully improves prediction accuracy, consistent with the two sources of information being complementary rather than substitutable.
+To test whether the result depended on a favourable chromosome 21 split, a
+nested chromosome-level analysis was performed. Each chromosome was held out
+in turn, while model settings were selected using a separate validation
+chromosome. The combined model improved on the distance baseline for all six
+test chromosomes.
 
-A few things this project does not show are worth stating plainly. It does not demonstrate that ATAC-seq could substitute for Hi-C experimentally, and it does not establish that chromatin accessibility causally strengthens genomic contacts: the analysis is predictive, not mechanistic. The model was trained and evaluated within a single cell line, at a single resolution, over a bounded range of short genomic separations. Any conclusions drawn from this work should be read as specific to short-range cis contact prediction in GM12878 cells under the conditions tested here, rather than as a general statement about chromatin accessibility and genome folding.
+- Chromosomes improved: **6 of 6**
+- Median MSE reduction: **45.80%**
+- Median MAE reduction: **29.98%**
+- Lowest MSE reduction: **9.02%** on chromosome 19
 
-## 6. Methods Summary
+The magnitude of improvement differed between chromosomes, so the median
+should not be interpreted as a genome-wide estimate. The analysis does,
+however, show that the main finding is not restricted to chromosome 21.
 
-Pairwise features were constructed separately for each chromosome, covering bins one to fifteen positions apart (corresponding to the 100 kb-1.5 Mb range), and pairs involving bins without Hi-C coverage were excluded. The distance baseline predicted, for each discrete genomic separation, the mean contact strength observed in the training data at that separation. Candidate gradient-boosted models were trained on chromosomes 16 through 19 and ranked by their MSE on chromosome 20, and the best-ranked configuration was then evaluated exactly once on chromosome 21. Because the modelled contact target after transformation is non-negative, all predictions were clipped at zero.
+## Interpretation
 
-Model performance was assessed using mean squared error, mean absolute error, R-squared, Pearson correlation and Spearman correlation, supplemented by calibration analysis, residual-by-distance analysis, and the model ablation described above. The nested chromosome-level validation followed the same logic as the primary analysis, always keeping the chromosome used for final testing separate from the chromosome used to select model settings.
+The results indicate that chromatin accessibility contributes information that
+is not fully captured by genomic distance. Distance remained the strongest
+single predictor, while ATAC alone had limited predictive value. The improved
+performance of the combined model therefore reflects complementary rather than
+substitutive information.
 
-## 7. Limitations
+This project does not show that ATAC-seq can replace Hi-C, nor does it establish
+that accessibility directly causes stronger chromatin contacts. The model was
+trained and tested within one cell line, at one resolution and over a defined
+short-range interval. The conclusion should therefore remain specific to
+prediction of short-range GM12878 cis contacts under the conditions tested.
 
-Several limitations should be kept in mind when interpreting this work. The validated dataset covers only chromosomes 16 through 21 of a single cell line, GM12878, and the analysis is restricted to 100 kb bins and separations of no more than 1.5 Mb. Because nearby genomic pairs are not independent of one another, the individual pair-level observations used in model fitting and evaluation should not be treated as independent biological replicates. ATAC-derived features may also be capturing technical artefacts or other genomic covariates rather than accessibility itself, and as noted above, predictive improvement is not evidence of a causal relationship between accessibility and contact formation. A planned extension to the remaining GM12878 autosomes, and a further exploratory comparison against K562 cells, have not yet been carried out and should not be treated as completed or successful until their outputs have actually been generated and reviewed.
+## Methods summary
 
-## 8. Data Sources
+### Data processing
 
-All datasets used were GRCh38 ENCODE releases: GM12878 Hi-C data (accession ENCFF916GWS), GM12878 ATAC-seq signal p-value data (accession ENCFF667MDI), and, for the planned but not-yet-executed cross-cell-line comparison, K562 Hi-C data (accession ENCFF080DPJ) and K562 ATAC-seq data (accession ENCFF600FDO). File accessions and checksums are recorded in the project's dataset configuration, and all source data remain subject to ENCODE's data-use policies.
+Matched GRCh38 GM12878 datasets were downloaded from ENCODE. Hi-C matrices were
+extracted at 100 kb resolution using `VC_SQRT` balancing. ATAC-seq signal was
+averaged into the corresponding genomic bins. Chromosomes with missing or
+non-finite values were rejected during validation, and the processed Hi-C
+matrices were checked for compatible dimensions, non-negative values and
+symmetry.
 
-## 9. Planned Extensions
+### Pairwise feature construction
 
-Two further pieces of work are set up but not yet run. The first is an evaluation across the remaining GM12878 autosomes, using the model settings already fixed on chromosomes 16 through 21 rather than retuning them on the new data. The second is a matched evaluation on K562 cells, followed by an exploratory test of how well a model trained on GM12878 transfers to K562 without retraining. Both extensions are implemented and ready to run, but neither has produced results yet, and neither should be treated as a successful validation until it has actually been executed and checked.
+Pairs one to fifteen bins apart were generated separately for each chromosome.
+Pairs involving bins without Hi-C coverage were excluded. Feature construction
+was symmetric with respect to the two loci, preventing the arbitrary order of
+the pair from changing its representation.
 
-## 10. Citation and Licence
+### Baseline and model selection
 
-Anyone using this repository is asked to cite the accompanying citation file, which lists the software and the ENCODE data sources drawn on here. The code itself is released under the MIT Licence.
+The distance baseline predicted the mean training-set contact strength at each
+discrete genomic separation. Candidate gradient-boosted models were trained on
+chromosomes 16–19 and ranked by MSE on chromosome 20. The selected model was
+then evaluated once on the chromosome 21 long arm. Predictions were clipped at
+zero because the transformed contact target was non-negative.
+
+### Evaluation
+
+Performance was assessed using MSE, MAE, R², Pearson correlation and Spearman
+correlation. Calibration, residuals by genomic separation and model ablation
+were examined in addition to headline error metrics. Nested validation kept
+the outer test chromosome separate from the chromosome used for model
+selection.
+
+Full implementation details are provided in
+[`docs/METHODS.md`](docs/METHODS.md), with interpretation and quality checks in
+[`docs/VALIDATED_REPORT.md`](docs/VALIDATED_REPORT.md) and
+[`docs/QA_REPORT.md`](docs/QA_REPORT.md).
+
+## Source datasets
+
+All source files are GRCh38 ENCODE releases.
+
+| Cell line | Assay | ENCODE file | Output |
+|---|---|---|---|
+| GM12878 | Hi-C | [ENCFF916GWS](https://www.encodeproject.org/files/ENCFF916GWS/) | Mapping-quality-thresholded contact matrix |
+| GM12878 | ATAC-seq | [ENCFF667MDI](https://www.encodeproject.org/files/ENCFF667MDI/) | Signal p-value bigWig |
+| K562 | Hi-C | [ENCFF080DPJ](https://www.encodeproject.org/files/ENCFF080DPJ/) | Mapping-quality-thresholded contact matrix |
+| K562 | ATAC-seq | [ENCFF600FDO](https://www.encodeproject.org/files/ENCFF600FDO/) | Signal p-value bigWig |
+
+The K562 files are included in the data manifest for the planned external
+validation; they were not used to produce the validated results reported
+above. File accessions and MD5 checksums are recorded in
+[`configs/datasets.json`](configs/datasets.json). Source data remain subject to
+ENCODE's data-use policies.
+
+## Repository structure
+
+```text
+.
+├── configs/                  # Dataset accessions and checksums
+├── data/
+│   ├── processed/            # Validated chr16–21 processed dataset
+│   └── README.md             # Data provenance and licensing notes
+├── docs/                     # Methods, validation and quality reports
+├── notebooks/
+│   ├── 01_GM12878_validated_chr16_21.ipynb
+│   └── 02_genomewide_external_validation.ipynb
+├── results/
+│   ├── validated/            # Original validated result tables and model
+│   └── modular_reproduction/ # Reproduced results, predictions and figures
+├── scripts/                  # Extraction and analysis entry points
+├── src/atac_hic/             # Reusable analysis package
+└── tests/                    # Automated data, feature and model tests
+```
+
+## Reproducing the validated analysis
+
+Create an isolated environment and install the project:
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install -e ".[dev]"
+```
+
+Reproduce the held-out chromosome 21 analysis:
+
+```bash
+python scripts/run_validated.py \
+  --data data/processed/GM12878_VC_SQRT_chr16_21.npz \
+  --output-directory results/my_reproduction
+```
+
+Run the automated tests:
+
+```bash
+pytest
+```
+
+The continuous-integration workflow also runs the test suite following each
+push or pull request.
+
+## Planned validation
+
+The repository includes a separate workflow for two extensions:
+
+1. evaluation on the remaining GM12878 autosomes using model settings fixed
+   before those chromosomes are examined; and
+2. matched K562 evaluation, followed by an exploratory GM12878-to-K562 transfer
+   test.
+
+These analyses are implemented in
+[`notebooks/02_genomewide_external_validation.ipynb`](notebooks/02_genomewide_external_validation.ipynb)
+and [`scripts/run_expansion.py`](scripts/run_expansion.py), but they have not yet
+been executed. They should not be described as successful validation until the
+required outputs have been generated and reviewed.
+
+## Limitations
+
+- The validated dataset contains only chromosomes 16–21 from GM12878.
+- The analysis is restricted to 100 kb bins and separations up to 1.5 Mb.
+- Nearby genomic pairs are correlated, so pair-level observations are not
+  independent biological replicates.
+- ATAC-derived features may capture technical or genomic covariates as well as
+  biological accessibility.
+- Predictive improvement does not demonstrate a causal relationship between
+  accessibility and chromatin contact formation.
+- Full-autosome and cross-cell-line confirmation remain outstanding.
+
+## Citation and licence
+
+If you use this repository, please cite the software and data sources described
+in [`CITATION.cff`](CITATION.cff). The project code is released under the
+[MIT Licence](LICENSE).
