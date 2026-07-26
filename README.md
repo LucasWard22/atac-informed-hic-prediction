@@ -25,6 +25,12 @@ No pair from the test chromosome is used during training or tuning.
 | Pearson | 0.7663 | 0.8207 |
 | Spearman | 0.7878 | 0.8584 |
 
+### Held-out chromosome 21 diagnostics
+
+![Held-out chromosome 21 validation diagnostics](results/modular_reproduction/chr21_validation_diagnostics.png)
+
+The combined distance-and-ATAC model outperformed the distance-only baseline on the independent chromosome 21 test region. The diagnostic panels show observed-versus-predicted contacts, residual behaviour and performance across genomic distances.
+
 This is a **29.57% reduction in MSE** and **29.73% reduction in MAE** relative
 to the distance-only baseline. The held-out calibration slope is 0.964 and
 the mean residual is −0.027 log1p contact units.
